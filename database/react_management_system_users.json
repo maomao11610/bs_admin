@@ -1,0 +1,5 @@
+{"_id":{"$oid":"614745fa4638773420a35148"},"username":"admin","password":"21232f297a57a5a743894a0e4a801fc3","create_time":1.632060922397E+12,"__v":0}
+{"_id":{"$oid":"6147562f629a1228987da100"},"username":"admin123","password":"0192023a7bbd73250516f069df18b500","phone":"13578010590","email":"169637637@163.com","role_id":"6159720e4abc6f461490c13b","create_time":1.632065071235E+12,"__v":0}
+{"_id":{"$oid":"615a95684abc6f461490c13e"},"username":"admin456","phone":"13578900450","email":"276645719@qq.com","role_id":"614755184377a13f28345f45","password":"e10adc3949ba59abbe56e057f20f883e","create_time":1.633326440466E+12,"__v":0}
+{"_id":{"$oid":"615aa4e94abc6f461490c140"},"username":"test","password":"e10adc3949ba59abbe56e057f20f883e","phone":"15868100590","email":"276789@qq.com","role_id":"615990384abc6f461490c13d","create_time":1.633330409923E+12,"__v":0}
+{"_id":{"$oid":"615aa51c4abc6f461490c141"},"username":"test2","phone":"14784050605","email":"275454545@qq.com","role_id":"614755184377a13f28345f44","password":"e10adc3949ba59abbe56e057f20f883e","create_time":1.633330460786E+12,"__v":0}
