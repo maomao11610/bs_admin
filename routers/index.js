@@ -9,8 +9,11 @@ const CategoryModel = require('../models/CategoryModel')
 const ProductModel = require('../models/ProductModel')
 const RoleModel = require('../models/RoleModel')
 //订单处理
-const OrdertModel=require('../models/OrderModel')
-
+const OrdertModel = require('../models/OrderModel')
+// 内容单
+const ExamineModel = require('../models/ExamineModel')
+// 详情
+const ContentModel = require('../models/contentModel')
 
 // 得到路由器对象
 const router = express.Router()
@@ -397,7 +400,7 @@ router.post('/manage/role/update', (req, res) => {
 })
 
 // 获取订单列表
-router.get('/order/list', async(req, res) => {
+router.get('/order/list', async (req, res) => {
   const { pageNum, pageSize } = req.query
   OrdertModel.find({})
     .then(result => {
@@ -411,11 +414,11 @@ router.get('/order/list', async(req, res) => {
 // 根据订单号搜索订单列表搜素功能接口
 router.get('/order/list/search', (req, res) => {
   const { pageNum, pageSize, searchName } = req.query
-  console.log('搜搜关键词是：'+searchName+'类型是'+typeof(searchName))
+  console.log('搜搜关键词是：' + searchName + '类型是' + typeof (searchName))
   let contition = {}
   if (searchName) {
     contition = { orderId: new RegExp(`^.*${searchName}.*$`) }
-  } 
+  }
   OrdertModel.find(contition)
     .then(order => {
       console.log('搜查');
@@ -425,6 +428,19 @@ router.get('/order/list/search', (req, res) => {
       console.error('搜索商品列表异常', error)
       res.send({ status: 1, msg: '搜索商品列表异常, 请重新尝试' })
     })
+})
+
+
+// 内容审核table
+router.get('/order/examine', async (req, res) => {
+  console.log('内容表');
+  const e = new ExamineModel({
+    saleId:'01',
+    carName: '五菱宏光把啦啦啦啦啦五系Qs01235',
+    location: '上海',
+    status: 0
+  })
+  e.save();
 })
 /*
 得到指定数组的分页信息对象
