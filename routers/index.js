@@ -398,46 +398,32 @@ router.post('/manage/role/update', (req, res) => {
 
 // 获取订单列表
 router.get('/order/list', async(req, res) => {
-  console.log('aaa');
-  // const result={
-  //   orderId: '01', 
-  //   brand: '大众', 
-  //   price: 2000, 
-  //   series:'Q5',
-  //   sellerName:'sale2',
-  //   color: '红色',
-  //   displacement:5,
-  //   transmissionCase: 1, 
-  //   pic:'path1',
-  //   mileage:1000,
-  //   orderTime:1234567889,
-  //   listingTime:1234567889,
-  // }
-  // res.send({status:0,data:result})
-  // var oRder=new OrdertModel({
-  //   orderId: '01', 
-  //   brand: '大众', 
-  //   price: 2000, 
-  //   series:'Q5',
-  //   sellerName:'sale2',
-  //   color: '红色',
-  //   displacement:5,
-  //   transmissionCase: 1, 
-  //   pic:'path1',
-  //   mileage:1000,
-  //   orderTime:1234567889,
-  //   listingTime:1234567889,
-  // })
-  // oRder.save();
-  OrdertModel.find()
-    .then(result=>{
-      console.log(result)
-      // 要使用就必须要遍历数据进行列表展示
-      res.send({status:0,data:result[0]})
+  const { pageNum, pageSize } = req.query
+  OrdertModel.find({})
+    .then(result => {
+      res.send({ status: 0, data: pageFilter(result, pageNum, pageSize) })
     })
     .catch(error => {
-      console.error('获取订单异常', error)
-      res.send({status: 1, msg: '获取订单异常, 请重新尝试'})
+      console.error('获取订单列表异常', error)
+      res.send({ status: 1, msg: '获取订单列表异常, 请重新尝试' })
+    })
+})
+// 根据订单号搜索订单列表搜素功能接口
+router.get('/order/list/search', (req, res) => {
+  const { pageNum, pageSize, searchName } = req.query
+  console.log('搜搜关键词是：'+searchName+'类型是'+typeof(searchName))
+  let contition = {}
+  if (searchName) {
+    contition = { orderId: new RegExp(`^.*${searchName}.*$`) }
+  } 
+  OrdertModel.find(contition)
+    .then(order => {
+      console.log('搜查');
+      res.send({ status: 0, data: pageFilter(order, pageNum, pageSize) })
+    })
+    .catch(error => {
+      console.error('搜索商品列表异常', error)
+      res.send({ status: 1, msg: '搜索商品列表异常, 请重新尝试' })
     })
 })
 /*
