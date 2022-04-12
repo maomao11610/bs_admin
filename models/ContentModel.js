@@ -1,7 +1,7 @@
 /*
  * @Author: your name
  * @Date: 2022-04-11 19:33:22
- * @LastEditTime: 2022-04-11 20:05:46
+ * @LastEditTime: 2022-04-12 19:42:01
  * @LastEditors: Please set LastEditors
  * @Description: 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  * @FilePath: \admin-server\models\ContentDetails.js
@@ -16,7 +16,7 @@ const contentSchema = new mongoose.Schema({
 saleId:{type:String,required:true},//该内容单编号：点击后根据这个号查询到详情
   sallerName: {type: String, required: true}, // 卖家name
   sallerId: {type: String, required: true}, // 身份证号
-  cardPic: {type: Number, required: true}, // 身份证原件路径
+  cardPic: {type: String, required: true}, // 身份证原件路径
   carPic:{type:String,required:true},//车封面
   mileage:{type:Number},//里程
   listingTime:{type:Number},//挂牌日期 1646901370673,

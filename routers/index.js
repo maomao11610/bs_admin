@@ -13,7 +13,7 @@ const OrdertModel = require('../models/OrderModel')
 // 内容单
 const ExamineModel = require('../models/ExamineModel')
 // 详情
-const ContentModel = require('../models/contentModel')
+const ContentModel = require('../models/ContentModel')
 
 // 得到路由器对象
 const router = express.Router()
@@ -414,7 +414,6 @@ router.get('/order/list', async (req, res) => {
 // 根据订单号搜索订单列表搜素功能接口
 router.get('/order/list/search', (req, res) => {
   const { pageNum, pageSize, searchName } = req.query
-  console.log('搜搜关键词是：' + searchName + '类型是' + typeof (searchName))
   let contition = {}
   if (searchName) {
     contition = { orderId: new RegExp(`^.*${searchName}.*$`) }
@@ -433,14 +432,28 @@ router.get('/order/list/search', (req, res) => {
 
 // 内容审核table
 router.get('/order/examine', async (req, res) => {
-  console.log('内容表');
-  const e = new ExamineModel({
-    saleId:'01',
-    carName: '五菱宏光把啦啦啦啦啦五系Qs01235',
-    location: '上海',
-    status: 0
-  })
-  e.save();
+  const { pageSize, pageNum } = req.query
+  ExamineModel.find({})
+    .then(result => {
+      res.send({ status: 0, data: pageFilter(result, pageNum, pageSize) })
+    })
+    .catch(error => {
+      console.error('获内容列表异常', error)
+      res.send({ status: 1, msg: '获取内容列表异常, 请重新尝试' })
+    })
+
+})
+// 根据内容单编号获取资料详情
+router.get('/order/examine/detail', (req, res) => {
+  const saleId = req.query.saleId
+  ContentModel.findOne({ saleId: saleId })
+    .then(result => {
+      res.send({ status: 0, data: result })
+    })
+    .catch(error => {
+      console.error('获取资料详情异常', error)
+      res.send({ status: 1, msg: '获取资料详情异常, 请重新尝试' })
+    })
 })
 /*
 得到指定数组的分页信息对象
@@ -465,7 +478,20 @@ function pageFilter(arr, pageNum, pageSize) {
     list
   }
 }
-
+// 审核后更新
+// 更新产品状态(上架/下架)
+router.post('/order/examine/update',async (req, res) => {
+  const {saleId}=req.body;
+ await ExamineModel.update({ saleId:saleId}, { status:1 })
+    .then(oldResult => {
+      res.send({ status: 1 })
+    })
+    .catch(error => {
+      console.error('更新状态异常', error)
+      res.send({ status: 1, msg: '更新状态异常, 请重新尝试' })
+    })
+  console.log('更新接口')
+})
 require('./file-upload')(router)
 
 module.exports = router
