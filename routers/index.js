@@ -479,7 +479,7 @@ function pageFilter(arr, pageNum, pageSize) {
   }
 }
 // 审核后更新
-// 更新产品状态(上架/下架)
+// 更新审核状态
 router.post('/order/examine/update',async (req, res) => {
   const {saleId}=req.body;
  await ExamineModel.update({ saleId:saleId}, { status:1 })
