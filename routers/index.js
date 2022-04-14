@@ -315,12 +315,14 @@ router.get('/manage/product/list', (req, res) => {
 
 // 搜索产品列表
 router.get('/manage/product/search', (req, res) => {
-  const { pageNum, pageSize, searchName, productName, productDesc } = req.query
+  const { pageNum, pageSize, searchName, productName, productMilleage,productPrice } = req.query
   let contition = {}
   if (productName) {
     contition = { name: new RegExp(`^.*${productName}.*$`) }
-  } else if (productDesc) {
-    contition = { desc: new RegExp(`^.*${productDesc}.*$`) }
+  } else if (productPrice) {
+    contition = { price: productPrice }
+  }else if(productMilleage){
+    contition = { milleage: productMilleage }
   }
   ProductModel.find(contition)
     .then(products => {
