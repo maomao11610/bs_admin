@@ -14,7 +14,10 @@ const OrdertModel = require('../models/OrderModel')
 const ExamineModel = require('../models/ExamineModel')
 // 详情
 const ContentModel = require('../models/ContentModel')
-
+// APP首页信息model
+const AindexlistModel = require('../models/AindexlistModel');
+// APP点击后商品详情关联了productModel
+const ProductDetailModel = require('../models/ProductDetailModel')
 // 得到路由器对象
 const router = express.Router()
 // console.log('router', router)
@@ -315,13 +318,14 @@ router.get('/manage/product/list', (req, res) => {
 
 // 搜索产品列表
 router.get('/manage/product/search', (req, res) => {
-  const { pageNum, pageSize, searchName, productName, productMilleage,productPrice } = req.query
+  const { pageNum, pageSize, searchName, productName, productMilleage, productPrice } = req.query
+  console.log(productName)
   let contition = {}
   if (productName) {
     contition = { name: new RegExp(`^.*${productName}.*$`) }
   } else if (productPrice) {
     contition = { price: productPrice }
-  }else if(productMilleage){
+  } else if (productMilleage) {
     contition = { milleage: productMilleage }
   }
   ProductModel.find(contition)
@@ -482,9 +486,9 @@ function pageFilter(arr, pageNum, pageSize) {
 }
 // 审核后更新
 // 更新审核状态
-router.post('/order/examine/update',async (req, res) => {
-  const {saleId}=req.body;
- await ExamineModel.update({ saleId:saleId}, { status:1 })
+router.post('/order/examine/update', async (req, res) => {
+  const { saleId } = req.body;
+  await ExamineModel.update({ saleId: saleId }, { status: 1 })
     .then(oldResult => {
       res.send({ status: 1 })
     })
@@ -493,6 +497,87 @@ router.post('/order/examine/update',async (req, res) => {
       res.send({ status: 1, msg: '更新状态异常, 请重新尝试' })
     })
   console.log('更新接口')
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// APP接口配置
+// 1.按名称搜索到达商品列表
+router.get('/aproduct/search', (req, res) => {
+  const { productName } = req.query
+  let contition = {}
+  if (productName) {
+    contition = { name: new RegExp(`^.*${productName}.*$`) }
+  }
+  ProductModel.find(contition)
+    .then(products => {
+      res.send({ status: 0, data: products })
+    })
+    .catch(error => {
+      console.error('APP搜索商品异常', error)
+      res.send({ status: 1, msg: 'APP搜索商品异常, 请重新尝试' })
+    })
+})
+// 2.按照品牌查询商品（首页点击每个品牌logo跳转）
+router.get('/aproduct/brandSearch', (req, res) => {
+  const { brand } = req.query
+  let contition = { brand: brand }
+  ProductModel.find(contition)
+    .then(products => {
+      res.send({ status: 0, data: products })
+    })
+    .catch(error => {
+      console.error('APP搜索商品异常', error)
+      res.send({ status: 1, msg: 'APP搜索商品异常, 请重新尝试' })
+    })
+})
+// 3.根据商品点击获取详情，进行name匹配
+router.get('/aproduct/detail', (req, res) => {
+  console.log('详情接口被调用')
+  const {name}=req.query;
+  let contition = { name: name }
+  ProductDetailModel.find(contition)
+    .then(detail => {
+      res.send({ status: 0, data: detail[0] })
+    })
+    .catch(error => {
+      console.error('APP搜索商品异常', error)
+      res.send({ status: 1, msg: 'APP搜索商品异常, 请重新尝试' })
+    })
+
+})
+// 4.APP首页信息模块
+router.get('/aindex', (req, res) => {
+  AindexlistModel.find().then(list => {
+    res.send({ status: 0, data: list[0] })
+  }).catch(error => {
+    console.error('首页数据接口挂掉', error)
+    res.send({ status: 1, msg: '首页数据接口挂掉,请检查！' })
+  })
+})
+// 5.根据价格区间锁定车
+router.get('/aproduct/priceSearch', (req, res) => {
+  const {min,max}=req.query;
+  let contition={price:{$gte:min,$lte:max}}
+  ProductModel.find(contition)
+    .then(products => {
+      res.send({ status: 0, data: products })
+    })
+    .catch(error => {
+      console.error('APP搜索商品异常', error)
+      res.send({ status: 1, msg: 'APP搜索商品异常, 请重新尝试' })
+    })
 })
 require('./file-upload')(router)
 
