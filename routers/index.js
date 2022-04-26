@@ -579,6 +579,37 @@ router.get('/aproduct/priceSearch', (req, res) => {
       res.send({ status: 1, msg: 'APP搜索商品异常, 请重新尝试' })
     })
 })
+// 6.APP卖车第一个接口   点击提交单，提交到后台examin
+router.post('/asale/apply',(req,res)=>{
+console.log('申请接口')
+  const { saleId,carName,status,location } = req.body
+  console.log(saleId);
+  console.log(carName);
+  console.log(status);
+  console.log(location);
+  ExamineModel.create({ saleId:saleId,carName:carName,status:status,location:location })
+    .then(examine => {
+      res.send({ status: 0, data: examine })
+    })
+    .catch(error => {
+      console.error('申请异常', error)
+      res.send({ status: 1, msg: '申请异常, 请重新尝试' })
+    })
+})
+// 7.第二个审核后线下核查后生成一个content，提交到后台
+router.post('/asale/setContet',(req,res)=>{
+    const { saleId,sallerName,sallerId,cardPic,carPic,mileage,listingTime,repair,reviewPic,reviewerNumber } = req.body
+    console.log(saleId);
+    ContentModel.create({ saleId:saleId,sallerName:sallerName,sallerId:sallerId,cardPic:cardPic,carPic:carPic,mileage:mileage, listingTime:listingTime,repair:repair,reviewPic:reviewPic,reviewerNumber:reviewerNumber})
+      .then(content => {
+        res.send({ status: 0, data: content })
+      })
+      .catch(error => {
+        console.error('审核提交异常', error)
+        res.send({ status: 1, msg: '审核提交异常, 请重新尝试' })
+      })
+  })
+// 8.完全线下交易完成进行线上形成订单
 require('./file-upload')(router)
 
 module.exports = router
