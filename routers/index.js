@@ -18,6 +18,8 @@ const ContentModel = require('../models/ContentModel')
 const AindexlistModel = require('../models/AindexlistModel');
 // APP点击后商品详情关联了productModel
 const ProductDetailModel = require('../models/ProductDetailModel')
+// 卖家进度
+const CurrentModel=require('../models/CurrentModel');
 // 得到路由器对象
 const router = express.Router()
 // console.log('router', router)
@@ -515,12 +517,12 @@ router.post('/order/examine/update', async (req, res) => {
 // APP接口配置
 // 1.按名称搜索到达商品列表
 router.get('/aproduct/search', (req, res) => {
-  const { productName } = req.query
+  const { name } = req.query
   let contition = {}
-  if (productName) {
-    contition = { name: new RegExp(`^.*${productName}.*$`) }
+  if (name) {
+    contition = { name: new RegExp(`^.*${name}.*$`) }
   }
-  ProductModel.find(contition)
+  ProductModel.find(contition).sort({'sortKey':'-1'})
     .then(products => {
       res.send({ status: 0, data: products })
     })
@@ -533,7 +535,7 @@ router.get('/aproduct/search', (req, res) => {
 router.get('/aproduct/brandSearch', (req, res) => {
   const { brand } = req.query
   let contition = { brand: brand }
-  ProductModel.find(contition)
+  ProductModel.find(contition).sort({'sortKey':'-1'})
     .then(products => {
       res.send({ status: 0, data: products })
     })
@@ -544,7 +546,6 @@ router.get('/aproduct/brandSearch', (req, res) => {
 })
 // 3.根据商品点击获取详情，进行name匹配
 router.get('/aproduct/detail', (req, res) => {
-  console.log('详情接口被调用')
   const {name}=req.query;
   let contition = { name: name }
   ProductDetailModel.find(contition)
@@ -570,7 +571,7 @@ router.get('/aindex', (req, res) => {
 router.get('/aproduct/priceSearch', (req, res) => {
   const {min,max}=req.query;
   let contition={price:{$gte:min,$lte:max}}
-  ProductModel.find(contition)
+  ProductModel.find(contition).sort({'sortKey':'-1'})
     .then(products => {
       res.send({ status: 0, data: products })
     })
@@ -583,10 +584,6 @@ router.get('/aproduct/priceSearch', (req, res) => {
 router.post('/asale/apply',(req,res)=>{
 console.log('申请接口')
   const { saleId,carName,status,location } = req.body
-  console.log(saleId);
-  console.log(carName);
-  console.log(status);
-  console.log(location);
   ExamineModel.create({ saleId:saleId,carName:carName,status:status,location:location })
     .then(examine => {
       res.send({ status: 0, data: examine })
@@ -610,6 +607,115 @@ router.post('/asale/setContet',(req,res)=>{
       })
   })
 // 8.完全线下交易完成进行线上形成订单
+// 9.买车接口-全部车
+router.get('/aproduct/all', (req, res) => {
+  ProductModel.find(contition).sort({'sortKey':'-1'})
+    .then(products => {
+      res.send({ status: 0, data: products })
+    })
+    .catch(error => {
+      console.error('APP搜索商品异常', error)
+      res.send({ status: 1, msg: 'APP搜索商品异常, 请重新尝试' })
+    })
+})
+// 10.买车-筛选-级联
+router.get('/aproduct/select', (req, res) => {
+  const { brand,min,max,milleage } = req.query
+  const contition= { brand: brand,price:{$gte:min,$lte:max},milleage:{$lt:milleage} }
+  ProductModel.find(contition).sort({'sortKey':'-1'})
+    .then(products => {
+      console.log(products)
+      res.send({ status: 0, data: products })
+    })
+    .catch(error => {
+      console.error('APP搜索商品异常', error)
+      res.send({ status: 1, msg: 'APP搜索商品异常, 请重新尝试' })
+    })
+})
+// 11.个人中心登录
+// 登录
+// router.post('/alogin', (req, res) => {
+//   const { username, password } = req.body
+//   // 根据username和password查询数据库users, 如果没有, 返回提示错误的信息, 如果有, 返回登陆成功信息(包含user)
+//   UserModel.findOne({ username, password: md5(password) })
+//     .then(user => {
+//       if (user) { // 登录成功
+//         // 生成一个cookie(userid: user._id), 并交给浏览器保存
+//         res.cookie('userid', user._id, { maxAge: 1000 * 60 * 60 * 24 })
+//         if (user.role_id) {
+//           RoleModel.findOne({ _id: user.role_id })
+//             .then(role => {
+//               user._doc.role = role
+//               console.log('role user', user)
+//               res.send({ status: 0, data: user })
+//             })
+//         } else {
+//           user._doc.role = { menus: [] }
+//           // 返回登录成功信息(包含user)
+//           res.send({ status: 0, data: user })
+//         }
+
+//       } else {// 登录失败
+//         res.send({ status: 1, msg: '用户名或密码不正确!' })
+//       }
+//     })
+//     .catch(error => {
+//       console.error('登录异常', error)
+//       res.send({ status: 1, msg: '登录异常, 请重新尝试' })
+//     })
+// })
+// // 注册
+router.post('/aregister', (req, res) => {
+  // 读取请求参数数据
+  const { username, password } = req.body
+  // 处理: 判断用户是否已经存在, 如果存在, 返回提示错误的信息, 如果不存在, 保存
+  // 查询(根据username)
+  UserModel.findOne({ username })
+    .then(user => {
+      // 如果user有值(已存在)
+      if (user) {
+        // 返回提示错误的信息
+        res.send({ status: 1, msg: '此用户已存在' })
+        return new Promise(() => {
+        })
+      } else { // 没值(不存在)
+        // 保存
+        return UserModel.create({ ...req.body, password: md5(password || 'atguigu') })
+      }
+    })
+    .then(user => {
+      // 返回包含user的json数据
+      res.send({ status: 0, data: user })
+    })
+    .catch(error => {
+      console.error('注册异常', error)
+      res.send({ status: 1, msg: '注册异常, 请联系管理员13891123308' })
+    })
+})
+// APP登录获取卖车进度current
+router.get('/asale/current',(req,res)=>{
+  const {username}=req.query;
+  let contition = { username: username }
+  CurrentModel.find(contition)
+    .then(current => {
+      res.send({ status: 0, data: current[0] })
+    })
+    .catch(error => {
+      console.error('卖家进度未获取到', error)
+      res.send({ status: 1, msg: '卖家进度未获取到, 请重新尝试' })
+    })
+})
+// APP即时通讯与登录接口联调-拿到用户数据
+router.get('/alogin/getUserData',(req,res)=>{
+  UserModel.find().then(data=>{
+    res.send({ status: 0, data: user })
+  }).catch(err=>{
+    res.send({ status: 1, msg: '用户获取异常, 请重新尝试' })
+  })
+})
+
+
+
 require('./file-upload')(router)
 
 module.exports = router
