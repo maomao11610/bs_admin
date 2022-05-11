@@ -12,6 +12,7 @@ const mongoose = require('mongoose');
 const productDetailSchema = new  mongoose.Schema({
     // 主键
     username:{type:String},
+    uuid:{type:String},
     swiperList: [{
         id: { type: Number },
         img: { type: String },

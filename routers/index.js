@@ -609,7 +609,7 @@ router.post('/asale/setContet',(req,res)=>{
 // 8.完全线下交易完成进行线上形成订单
 // 9.买车接口-全部车
 router.get('/aproduct/all', (req, res) => {
-  ProductModel.find(contition).sort({'sortKey':'-1'})
+  ProductModel.find().sort({'sortKey':'-1'})
     .then(products => {
       res.send({ status: 0, data: products })
     })
@@ -712,6 +712,18 @@ router.get('/alogin/getUserData',(req,res)=>{
   }).catch(err=>{
     res.send({ status: 1, msg: '用户获取异常, 请重新尝试' })
   })
+})
+// 订单生成完成后台统计
+router.post('/aConfirm', (req, res) => {
+  const confirm = req.body
+  OrdertModel.create(confirm)
+    .then(confirm => {
+      res.send({ status: 0, data: confirm })
+    })
+    .catch(error => {
+      console.error('生成订单异常', error)
+      res.send({ status: 1, msg: '生成订单异常, 请重新尝试' })
+    })
 })
 
 
